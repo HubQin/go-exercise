@@ -8,10 +8,10 @@ import (
 
 // https://gobyexample.com/waitgroups
 func main() {
-	fmt.Println("normal example...")
+	fmt.Println("waitgroup example...")
 	var wg sync.WaitGroup
 
-	for i := 1; i<=5;i++  {
+	for i := 1; i <= 5; i++ {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
@@ -22,16 +22,19 @@ func main() {
 	}
 	wg.Wait()
 
-	fmt.Println("closure buggy example...")
-
-	for i := 1; i<=5;i++  {
-		wg.Add(1)
+	// not good
+	fmt.Println("chan example...")
+	c := make(chan bool, 6)
+	for i := 1; i <= 5; i++ {
+		i := i
 		go func() {
-			defer wg.Done()
-			fmt.Printf("***Worker %d starting\n", i)
+			fmt.Printf("Worker %d starting\n", i)
 			time.Sleep(time.Second)
-			fmt.Printf("***Worker %d done\n", i)
+			fmt.Printf("Worker %d done\n", i)
+			c <- true
 		}()
 	}
-	wg.Wait()
+	for i := 1; i <= 5; i++ {
+		<-c
+	}
 }
